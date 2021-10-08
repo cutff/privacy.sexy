@@ -1,11 +1,8 @@
 import { retryWithExponentialBackOffAsync } from './ExponentialBackOffRetryHandler';
 import { IUrlStatus } from './IUrlStatus';
-import fetch from 'cross-fetch';
-
-export interface IRequestOptions {
-    retryExponentialBaseInMs?: number;
-    additionalHeaders?: Record<string, string>;
-}
+// import fetch from 'cross-fetch'; // https://github.com/lquixada/cross-fetch/issues/117
+import fetch, { RequestInit as NodeFetchRequestInit } from 'node-fetch';
+ // node-fetch instead of cross-fetch due to: https://github.com/lquixada/cross-fetch/issues/117
 
 export async function getUrlStatusAsync(
     url: string,
@@ -23,15 +20,27 @@ export async function getUrlStatusAsync(
     }, options.retryExponentialBaseInMs);
 }
 
+export interface IRequestOptions {
+    retryExponentialBaseInMs?: number;
+    additionalHeaders?: Record<string, string>;
+    maximumRedirectDepth?: number;
+}
+
 const DefaultOptions: IRequestOptions = {
     retryExponentialBaseInMs: 5000,
     additionalHeaders: {},
+    maximumRedirectDepth: 100, // node-fetch defaults to 20
 };
 
-function getFetchOptions(options: IRequestOptions) {
+function getFetchOptions(options: IRequestOptions): RequestInit {
+    const nodeFetchOptions: NodeFetchRequestInit = {
+        follow: options.maximumRedirectDepth,
+    };
     return {
         method: 'GET',
         headers: { ...DefaultHeaders, ...options.additionalHeaders },
+        redirect: 'follow',
+        ...nodeFetchOptions,
     };
 }
 

@@ -59,6 +59,7 @@
     "electron-updater": "^4.3.9",
     "js-yaml-loader": "^1.2.2",
     "markdownlint-cli": "^0.29.0",
+    "node-fetch": "^2.6.1",
     "remark-cli": "^10.0.0",
     "remark-lint-no-dead-urls": "^1.1.0",
     "remark-preset-lint-consistent": "^5.1.0",
