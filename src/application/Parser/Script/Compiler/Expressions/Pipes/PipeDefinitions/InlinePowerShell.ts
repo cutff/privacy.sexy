@@ -25,8 +25,12 @@ function hasLines(text: string) {
     Line comments using "#" are replaced with inline comment syntax <# comment.. #>
     Otherwise single # comments out rest of the code
 */
-function replaceComments(code: string) {
-    return code.replaceAll(/#(?<!<#)(?![<>])(.*)$/gm, (_$, match1 ) => {
+function replaceComments(code: string) { // TODO: Fails on Safari
+    // TODO: Do we have test looking for "Only single-line comments are replaced, not multi-lined" or sth?
+    // We could use regex /#(?<!<#)(?![<>])(.*)$/gm but Safari does
+    // not support lookbehind in regex yet https://caniuse.com/js-regexp-lookbehind
+    // and throws "Invalid regular expression: invalid group specifier name"
+    return code.replaceAll(/[^<]#[^>](.*)$/gm, (_$, match1 ) => {
         const value = match1?.trim();
         if (!value) {
             return '<##>';
@@ -35,7 +39,7 @@ function replaceComments(code: string) {
     });
 }
 
-function getLines(code: string) {
+function getLines(code: string): string [] {
     return (code.split(/\r\n|\r|\n/) || []);
 }
 
@@ -88,7 +92,7 @@ function getHereStringHandler(quotes: string): IInlinedHereString {
     Output ->
         Get-Service * | Sort-Object StartType | Format-Table -AutoSize
 */
-function mergeLinesWithBacktick(code: string) {
+function mergeLinesWithBacktick(code: string) { // TODO: Fails
     /*
         The regex actually wraps any whitespace character after backtick and before newline
         However, this is not always the case for PowerShell.
